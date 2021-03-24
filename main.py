@@ -8,7 +8,7 @@ CLOCK = pygame.time.Clock()
 WINDOW = pygame.display.set_mode((800,600))
 pygame.display.set_caption('Pong')
 
-DISPLAY = pygame.Surface((100,75))
+DISPLAY = pygame.Surface((200, 150))
 
 class Ball:
     def __init__(self, entity_name: str, position: list = [0,0], size: list = [0,0], standard_action: str = 'idle'):
@@ -71,7 +71,7 @@ class Ball:
     def update(self):
         self.next_frame()
         self.apply_movement(self.movement)
-        if self.__rect.top == 0 or self.__rect.bottom == 75:
+        if self.__rect.top < 1 or self.__rect.bottom > 149:
             self.movement[1] *= -1
 
 class Bar:
@@ -133,7 +133,7 @@ class Bar:
         self.next_frame()
         if self.__is_player_controlled:
             pressed_keys = pygame.key.get_pressed()
-            y_movement = (pressed_keys[K_DOWN] - pressed_keys[K_UP])
+            y_movement = (pressed_keys[K_DOWN] - pressed_keys[K_UP]) * 2
             self.apply_movement([0, y_movement])
         
         if self.__rect.colliderect(ball.get_rect()):
@@ -144,9 +144,9 @@ class Bar:
             ball.movement[1] += delta_y / 12
 
 
-ball = Ball('ball', [47, 35], [5, 5])
-blue_bar = Bar('blue_bar', [5, 25], [5, 25], player_controled=True)
-red_bar = Bar('red_bar', [90, 25], [5, 25])
+ball = Ball('ball', [98, 72], [5, 5])
+blue_bar = Bar('blue_bar', [5, 63], [5, 25], player_controled=True)
+red_bar = Bar('red_bar', [190, 63], [5, 25])
 
 while True:
     DISPLAY.fill((100,100,100))
