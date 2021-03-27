@@ -92,7 +92,6 @@ class Ball:
         if self.__rect.top < 1 or self.__rect.bottom > 149:
             self.movement[1] *= -1
             self.set_action('hit', True)
-            self.hit_count = 0
 
 class Bar:
     def __init__(self, entity_name: str, position: list = [0,0], size: list = [0,0], player_controled: bool = False, default_action: str = 'idle'):
@@ -164,28 +163,33 @@ class Bar:
 
     def update(self, ball: Ball = None):
         self.next_frame()
-        if self.__is_player_controlled:
+        if self.__is_player_controlled: # Player control system
             pressed_keys = pygame.key.get_pressed()
             y_movement = (pressed_keys[K_DOWN] - pressed_keys[K_UP]) * 2
             self.apply_movement([0, y_movement])
-        else:
+        else: # IA control system
             if ball.movement[0] > 0:
-                delta_y = ball.get_rect().centery - self.__rect.centery 
+                delta_y = ball.get_rect().centery - self.__rect.centery # Gets to where the ball is going
                 if delta_y > 0:
                     self.apply_movement([0, 1])
                 elif delta_y < 0:
                     self.apply_movement([0, -1])
         
-        if self.__rect.colliderect(ball.get_rect()):
+        if self.__rect.colliderect(ball.get_rect()): # Gets wherever the ball collides with the bars
             ball.movement[0] *= -1
             ball_y = ball.get_rect().y - ( ball.get_rect().height / 2 ) - 32.5
             self_y = self.__rect.y - ( self.__rect.height / 2 ) - 12.5
             delta_y = ball_y - self_y
-            ball.movement[1] += delta_y / 12 + int( ball.hit_count / 10 )
+            ball.movement[1] += delta_y / 12 # Sets the ball movement
 
-            self.set_action('hit', True)
-            ball.set_action('hit', True)
-            ball.hit_count += 1
+            if ball.movement[0] > 0:
+                ball.movement[0] += int( ball.hit_count / 10 ) / 2
+            elif ball.movement[0] < 0:
+                ball.movement[0] -= int( ball.hit_count / 10 ) / 2
+
+            self.set_action('hit', True) # Change the current bar action
+            ball.set_action('hit', True) # Change the ball action
+            ball.hit_count += 1 # Counter to increase the ball speed
 
 
 ball = Ball('ball', [98, 72], [5, 5])
@@ -217,10 +221,13 @@ while True:
         red_bar.score += 1
         ball.set_position([98, 72])
         ball.movement = [random.choice([-1.5, 1.5]), 0]
+        ball.hit_count = 0
+
     elif ball.get_rect().right > 199:
         blue_bar.score += 1
         ball.set_position([98, 72])
         ball.movement = [random.choice([-1.5, 1.5]), 0]
+        ball.hit_count = 0
 
     # DRAWING
 
@@ -229,7 +236,7 @@ while True:
     ball.render(DISPLAY)
 
     print(f'BLUE:{blue_bar.score}\nRED:{red_bar.score}')
-    
+
     WINDOW.blit(pygame.transform.scale(DISPLAY, (800,600)), (0,0))
     pygame.display.update()
     CLOCK.tick(60)
