@@ -20,6 +20,7 @@ class Ball:
         self.__size = size
         self.__rect = pygame.Rect(int(self.__position[0]), int(self.__position[1]), self.__size[0], self.__size[1])
         self.movement = [random.choice([-1.5, 1.5]), 0]
+        self.hit_count = 0
 
     # Loads all the entity actions
     def __load_actions(self, entity_name) -> dict :
@@ -91,6 +92,7 @@ class Ball:
         if self.__rect.top < 1 or self.__rect.bottom > 149:
             self.movement[1] *= -1
             self.set_action('hit', True)
+            self.hit_count = 0
 
 class Bar:
     def __init__(self, entity_name: str, position: list = [0,0], size: list = [0,0], player_controled: bool = False, default_action: str = 'idle'):
@@ -167,29 +169,23 @@ class Bar:
             y_movement = (pressed_keys[K_DOWN] - pressed_keys[K_UP]) * 2
             self.apply_movement([0, y_movement])
         else:
-            ball_y = ball.get_rect().centery + random.randint(-20, 20)
-            self_y = self.__rect.centery
-
-            y_delta = ball_y - self_y
-
-            if y_delta > 16 or y_delta < -16:
-                y_movement = 0
-                if ball_y - self_y < 0:
-                    y_movement = -2
-                elif ball_y - self_y > 0:
-                    y_movement = 2
-            
-                self.apply_movement([0, y_movement])
+            if ball.movement[0] > 0:
+                delta_y = ball.get_rect().centery - self.__rect.centery 
+                if delta_y > 0:
+                    self.apply_movement([0, 1])
+                elif delta_y < 0:
+                    self.apply_movement([0, -1])
         
         if self.__rect.colliderect(ball.get_rect()):
             ball.movement[0] *= -1
             ball_y = ball.get_rect().y - ( ball.get_rect().height / 2 ) - 32.5
             self_y = self.__rect.y - ( self.__rect.height / 2 ) - 12.5
             delta_y = ball_y - self_y
-            ball.movement[1] += delta_y / 12
+            ball.movement[1] += delta_y / 12 + int( ball.hit_count / 10 )
 
             self.set_action('hit', True)
             ball.set_action('hit', True)
+            ball.hit_count += 1
 
 
 ball = Ball('ball', [98, 72], [5, 5])
