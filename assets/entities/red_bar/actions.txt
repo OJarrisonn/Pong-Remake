@@ -1,2 +1,2 @@
-hit 1
-idle 1
+hit once 10
+idle loop 1
